@@ -107,3 +107,17 @@ class DataSet:
                       nodata=nodata
                      ) as out:
             out.write(data[:bandcnt, :, :])
+    
+    def describe_dataset(self, to_html=True):
+        stats = {}
+        if self.X_train is not None:
+            stats['train'] = self.X_train.describe(include='all')
+        if self.X_test is not None:
+            stats['test'] =  self.X_test.describe(include='all')
+        if self.target is not None:
+            stats['target'] = pd.DataFrame(self.flatten_target()).describe(include='all')
+        if to_html:
+            for k in stats:
+                stats[k] = stats[k].to_html()
+
+        return stats

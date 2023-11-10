@@ -12,6 +12,7 @@ from matplotlib.patches import Patch
 from matplotlib.colors import ListedColormap
 import matplotlib.colors as colors
 import rioxarray as rxr
+import rasterio as rio
 
 from . import const
 from .dataset import DataSet
@@ -49,12 +50,30 @@ class Maker:
         X_trans = self.preprocessor.run(self.ds.flatten_target())
         # save original to see if they are same
         # save transformed features
-        tmp_path = ".".join(save_to.split(".")[:-1]) + "_features." + save_to.split(".")[-1]
-        self.ds.gen_map(X_trans, tmp_path, bandcnt=X_trans.shape[-1])
+        feature_path = ".".join(save_to.split(".")[:-1]) + "_features." + save_to.split(".")[-1]
+        self.ds.gen_map(X_trans, feature_path, bandcnt=X_trans.shape[-1])
         # predict
         cls_pred = self.models[model_name].predict(X_trans)
         # generate
         self.ds.gen_map(cls_pred, save_to, bandcnt=1, dtype='uint8', nodata=const.CLS_NODATA)
+
+        return self.show_map(feature_path)
+
+    def show_map(self, mpath, need_show=False):
+        with rio.open(mpath) as src:
+            count = min(src.count, const.MAX_COMPONENT)+1
+            fig, ax = plt.subplots(count//2, 2, figsize=(10, count*10//4))
+            for i in range(1, count):
+                rio.plot.show((src, i), ax=ax[(i-1)//2, (i-1)%2], cmap='viridis', title=f'Band {i}', transform=src.transform)
+            if not need_show:
+                print("Generate Feature Images instead of showing")
+                tmpfile = BytesIO()
+                fig.savefig(tmpfile, format='png')
+                encoded = base64.b64encode(tmpfile.getvalue()).decode('utf-8')
+                return f'<img src=\'data:image/png;base64,{encoded}\'>'
+
+            plt.show()
+            
 
     def show_pred_map(self, mpath, title, legend_labels):
         if not mpath: return None
@@ -95,7 +114,7 @@ class Maker:
         start_time = time.time()
         self.preprocessor.set_current_transformers(preprocess)
         print(f"[{datetime.now()}] Begin to Preprocess {preprocess}")
-        X_train = self.preprocessor.run(self.ds.X_train.values)
+        X_train = self.preprocessor.run(self.ds.X_train.values, self.ds.Y_train)
         print(f"[{datetime.now()}] End to Preprocess")
         time_stat['preprocessing'] = time.time() - start_time
         start_time = time.time()
@@ -119,10 +138,11 @@ class Maker:
         time_stat['validate'] = time.time() - start_time
         start_time = time.time()
 
+        used_features_img = None
         # generate predict map
         if target_path and save_target_path:
             print(f"[{datetime.now()}] Begin to generate predicted map")
-            self.gen_pred_map(target_path, model_name, save_target_path)
+            used_features_img = self.gen_pred_map(target_path, model_name, save_target_path)
             print(f"[{datetime.now()}] Emd to generate predicted map")
         time_stat['map_gen'] = time.time() - start_time
         start_time = time.time()
@@ -137,12 +157,15 @@ class Maker:
                 target_path=target_path,
                 prepro_method=preprocess,
                 prepro_param=None,
+                used_pp_info=self.preprocessor.describe(),
                 used_feature_number=X_train.shape[-1],
+                used_features=used_features_img,
                 model_name=model_name,
                 model_param=model_param,
-                error_matrix=report['error_matrix'].to_html().replace('<table border="1" class="dataframe">','<table class="table table-striped">'),
-                overall_stat=report['overall_stat'].to_html().replace('<table border="1" class="dataframe">','<table class="table table-striped">'),
-                clsf_report=report['classfication_report'].to_html().replace('<table border="1" class="dataframe">','<table class="table table-striped">'),
+                ds_stats=self.ds.describe_dataset(),
+                error_matrix=report['error_matrix'].to_html(),
+                overall_stat=report['overall_stat'].to_html(),
+                clsf_report=report['classfication_report'].to_html(),
                 cm_display=report['cm']['display'],
                 cm_percent_heatmap=report['cm']['percent_hm'],
                 prepro_time=time_stat['preprocessing'],
@@ -156,7 +179,7 @@ class Maker:
     def set_preprocessors(self, pps):
         for k, pp in pps.items():
             self.preprocessor.register_transformer(k, pp)
-            
+
     def dump_object(self, fpath):
         with open(fpath, 'wb') as f:
             pickle.dump(self, f)
