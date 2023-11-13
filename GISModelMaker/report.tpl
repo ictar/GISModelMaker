@@ -39,7 +39,7 @@
         <!-- *** Section 3 Evaluation *** --->
         <h2>Section 3: Model Evaluation</h2>
         
-        <p></p>
+        <p><b>Model Information: {{model_info}}</b></p>
         <h3>1. Global Accuracy</h3>
         {{overall_stat.replace('<table border="1" class="dataframe">','<table class="table table-striped">')}}
         <h3>2. Error Matrix</h3>
@@ -53,9 +53,11 @@
         <h4>Confusion Matrix Heatmap (Percentage)</h4>
         {{cm_percent_heatmap}}
 
-        <!-- *** Section 3 Generated Map *** --->
+        <!-- *** Section 4 Generated Map *** --->
         <h2>Section 4: Mapping</h2>
         {{map}}
+
+        <!-- <h3>Areas</h3> -->
 
         <h2>Section 5: Time Statistics</h2>
         <p>Preprocessing Time: {{prepro_time}} s</p>

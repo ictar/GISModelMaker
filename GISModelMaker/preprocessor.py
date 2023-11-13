@@ -11,7 +11,7 @@ class Preprocesser:
         self.transformer_factory = {
             # decomposition
             const.PREPRO_PCA: PCA(n_components=0.99),
-            const.PREPRO_RBF_KERNEL_PCA: KernelPCA(n_components=const.MAX_COMPONENT, kernel="rbf", gamma=10, fit_inverse_transform=True, alpha=0.1),
+            const.PREPRO_RBF_KERNEL_PCA: KernelPCA(n_components=const.MAX_COMPONENT, kernel="rbf", gamma=0.04, fit_inverse_transform=True, alpha=0.01),
             # Factor Analysis
             const.PREPRO_FA: FactorAnalysis(n_components=const.MAX_COMPONENT),
             const.PREPRO_FICA: FastICA(n_components=const.MAX_COMPONENT),
@@ -38,11 +38,6 @@ class Preprocesser:
         print(self.transformers.keys())
     def list_allowed_transformer(self):
         print(self.transformer_factory.keys())
-
-    def describe_current_transformers(self):
-
-        for transf_name in self.transf_names:
-            pass
 
     def set_current_transformers(self, transf_names):
         self.transf_names = transf_names

@@ -1,5 +1,6 @@
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
+from sklearn.neural_network import MLPClassifier
 from sklearn.model_selection import GridSearchCV
 
 from . import const
@@ -26,7 +27,10 @@ _models = {
     const.MODEL_RANDOMFOREST_GS: grid_search_CV_generator(RandomForestClassifier),
     const.MODEL_SVC: basic_model_generator(SVC),
     const.MODEL_SVC_GS: grid_search_CV_generator(SVC),
+    const.MODEL_NN_MLP: basic_model_generator(MLPClassifier),
+    const.MODEL_NN_MLP_GS: grid_search_CV_generator(MLPClassifier),
 }
 
 def get(name):
     return _models.get(name)
+

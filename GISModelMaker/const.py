@@ -20,5 +20,7 @@ MODEL_RANDOMFOREST = 'RandomForest'
 MODEL_RANDOMFOREST_GS = 'RandomForest with GridSearch'
 MODEL_SVC = 'SVM'
 MODEL_SVC_GS = 'SVM with GridSearch'
+MODEL_NN_MLP = 'NN (Multi layer Perceptron)'
+MODEL_NN_MLP_GS = 'NN (Multi layer Perceptron) with GridSearch'
 # report template
 report_tpl_path = 'report.tpl'

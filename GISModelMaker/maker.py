@@ -122,7 +122,7 @@ class Maker:
         # process
         print(f"[{datetime.now()}] Begin to Process {model_name} using parameter {model_param}")
         self.models[model_name] = models.get(model_name)(X_train, self.ds.Y_train, model_param)
-        print(f"[{datetime.now()}] End to Process")
+        print(f"[{datetime.now()}] End to Process, model information: {self.describe_model(model_name)}")
         time_stat['train'] = time.time() - start_time
         start_time = time.time()
 
@@ -162,6 +162,7 @@ class Maker:
                 used_features=used_features_img,
                 model_name=model_name,
                 model_param=model_param,
+                model_info=self.describe_model(model_name),
                 ds_stats=self.ds.describe_dataset(),
                 error_matrix=report['error_matrix'].to_html(),
                 overall_stat=report['overall_stat'].to_html(),
@@ -180,6 +181,18 @@ class Maker:
         for k, pp in pps.items():
             self.preprocessor.register_transformer(k, pp)
 
+    def describe_model(self,name):
+        m = self.models[name]
+        info = {'name': name}
+        method = getattr(m, 'get_params', None)
+        if method:
+            info['params'] = method()
+        # GridSearchCV
+        #info['cv_results'] = getattr(m,'cv_results_', None)
+        info['best_params'] = getattr(m, 'best_params_', None)
+        # Basic
+
+        return info
     def dump_object(self, fpath):
         with open(fpath, 'wb') as f:
             pickle.dump(self, f)
