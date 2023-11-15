@@ -44,10 +44,10 @@ class Maker:
         self.valid = Validator()
 
     # map generalization using clf
-    def gen_pred_map(self, target_path, model_name, save_to):
-        self.ds.load_raster_data(target_path)
+    def gen_pred_map(self, target_path, target_feature_names, model_name, save_to):
+        self.ds.load_raster_data(target_path, target_feature_names)
         # preprocess target data
-        X_trans = self.preprocessor.run(self.ds.flatten_target())
+        X_trans = self.preprocessor.run(self.ds.get_target())
         # save original to see if they are same
         # save transformed features
         feature_path = ".".join(save_to.split(".")[:-1]) + "_features." + save_to.split(".")[-1]
@@ -108,13 +108,14 @@ class Maker:
         return f'<img src=\'data:image/png;base64,{encoded}\'>'
 
     # main workflow  
-    def run(self, preprocess, model_name, model_param, save_report_path, target_path=None, save_target_path=None):
+    def run(self, preprocess, model_name, model_param, save_report_path, target_path=None, save_target_path=None,
+    target_feature_names=None):
         time_stat = {}
         # preprocess
         start_time = time.time()
         self.preprocessor.set_current_transformers(preprocess)
         print(f"[{datetime.now()}] Begin to Preprocess {preprocess}")
-        X_train = self.preprocessor.run(self.ds.X_train.values, self.ds.Y_train)
+        X_train = self.preprocessor.run(self.ds.X_train, self.ds.Y_train)
         print(f"[{datetime.now()}] End to Preprocess")
         time_stat['preprocessing'] = time.time() - start_time
         start_time = time.time()
@@ -140,15 +141,14 @@ class Maker:
 
         used_features_img = None
         # generate predict map
-        if target_path and save_target_path:
+        if target_path and save_target_path and target_feature_names:
             print(f"[{datetime.now()}] Begin to generate predicted map")
-            used_features_img = self.gen_pred_map(target_path, model_name, save_target_path)
+            used_features_img = self.gen_pred_map(target_path, target_feature_names, model_name, save_target_path)
             print(f"[{datetime.now()}] Emd to generate predicted map")
         time_stat['map_gen'] = time.time() - start_time
         start_time = time.time()
 
         # generate report
-        
         with open(save_report_path, 'w') as f:
             env = jinja2.Environment(loader=jinja2.FileSystemLoader(os.path.dirname(__file__)))
             report_temp = env.get_template(const.report_tpl_path)

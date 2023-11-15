@@ -9,6 +9,8 @@ class Preprocesser:
         # transformers
         self.transformers = {}
         self.transformer_factory = {
+            # normalization
+            const.PREPRO_STANDSCALE: StandardScaler(),
             # decomposition
             const.PREPRO_PCA: PCA(n_components=0.99),
             const.PREPRO_RBF_KERNEL_PCA: KernelPCA(n_components=const.MAX_COMPONENT, kernel="rbf", gamma=0.04, fit_inverse_transform=True, alpha=0.01),
@@ -21,14 +23,6 @@ class Preprocesser:
             const.PREPRO_SKB_F1 : SelectKBest(f_classif, k=const.MAX_COMPONENT),
         }
         self.transf_names = None
-
-    ## Feature selection
-    ## normalize
-    ## ref: https://scikit-learn.org/stable/auto_examples/preprocessing/plot_scaling_importance.html
-    def feature_scaling(self, X, scaler=StandardScaler):
-        print("Feature scaling using ", scaler)
-        scaler = scaler()#.set_output(transform="pandas")
-        return scaler.fit_transform(X)
     
     def register_transformer(self, transf_name, transf):
         print("Register Transformer ", transf_name)
@@ -42,10 +36,8 @@ class Preprocesser:
     def set_current_transformers(self, transf_names):
         self.transf_names = transf_names
 
-    def run(self, X, Y=None, need_scale=True):
+    def run(self, X, Y=None):
         X_trans = X
-        if need_scale:
-            X_trans = self.feature_scaling(X_trans)
         
         for transf_name in self.transf_names:
             if transf_name not in self.transformers:

@@ -26,7 +26,7 @@ class DataSet:
     # load data
     # ref: https://gis.stackexchange.com/questions/32995/fully-load-raster-into-a-numpy-array
     # ref: http://patrickgray.me/open-geo-tutorial/chapter_5_classification.html
-    def load_raster_data(self, rpath):
+    def load_raster_data(self, rpath, feature_names):
         arr = None
         with rio.open(rpath) as ds:
             arr = ds.read() # (bands, rows, columns)
@@ -38,13 +38,17 @@ class DataSet:
             Raw data shape = {arr.shape}""")
         # rasters are in the format [bands, rows, cols] whereas images are typically [rows, cols, bands]   
         self.target = reshape_as_image(arr) # (rows, columns, bands)
+        # faltten the target: (rows*columns, bands)
+        self.target = pd.DataFrame(
+            self.target.reshape(-1, self.target_nbands),
+            columns=feature_names)
         #self.target_shape = self.target.shape
         #self.target_nbands = self.target_shape[-1]
         print("After reshape, the data shape:", self.target.shape)
     
 
-    def flatten_target(self):
-        return self.target.reshape(-1, self.target_nbands) # (rows*columns, bands)
+    def get_target(self):
+        return self.target
 
     # load train/test
     ## max_per_class: maximum number of points per class, -1 means no restriction
@@ -115,7 +119,7 @@ class DataSet:
         if self.X_test is not None:
             stats['test'] =  self.X_test.describe(include='all')
         if self.target is not None:
-            stats['target'] = pd.DataFrame(self.flatten_target()).describe(include='all')
+            stats['target'] = pd.DataFrame(self.get_target()).describe(include='all')
         if to_html:
             for k in stats:
                 stats[k] = stats[k].to_html()

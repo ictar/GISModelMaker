@@ -7,6 +7,7 @@ LULC_Legends_COLOR = {'#ffc425': (101, 'Bareland'), "#00ff83": (102, 'Cropland')
 
 MAX_COMPONENT = 20
 # preprocessor name
+PREPRO_STANDSCALE = 'Standard Scale'
 PREPRO_PCA = 'PCA'
 PREPRO_RBF_KERNEL_PCA = 'KernelPCA (RBF)'
 PREPRO_FA = 'FA'
