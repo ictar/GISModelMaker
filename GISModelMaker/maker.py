@@ -77,35 +77,39 @@ class Maker:
 
     def show_pred_map(self, mpath, title, legend_labels):
         if not mpath: return None
-        r_chm = rxr.open_rasterio(mpath, masked=True).squeeze()
-        # Define the colors you want
-        cmap = ListedColormap(list(legend_labels.keys()))
-        # Define a normalization from values -> colors
-        bins = [0]
-        bins.extend(sorted([v[0] for v in legend_labels.values()]))
+        try:
+            r_chm = rxr.open_rasterio(mpath, masked=True).squeeze()
+            # Define the colors you want
+            cmap = ListedColormap(list(legend_labels.keys()))
+            # Define a normalization from values -> colors
+            bins = [0]
+            bins.extend(sorted([v[0] for v in legend_labels.values()]))
 
-        norm = colors.BoundaryNorm(bins, len(legend_labels))
-        fig, ax = plt.subplots()
-        chm_plot = ax.imshow(r_chm,
-                            cmap=cmap,
-                            norm=norm)
+            norm = colors.BoundaryNorm(bins, len(legend_labels))
+            fig, ax = plt.subplots()
+            chm_plot = ax.imshow(r_chm,
+                                cmap=cmap,
+                                norm=norm)
 
-        ax.set_title(title)
+            ax.set_title(title)
 
-        patches = [Patch(color=color, label=label[-1])
-                for color, label in legend_labels.items()]
+            patches = [Patch(color=color, label=label[-1])
+                    for color, label in legend_labels.items()]
 
-        ax.legend(handles=patches,
-                bbox_to_anchor=(1.35, 1),
-                facecolor="white")
+            ax.legend(handles=patches,
+                    bbox_to_anchor=(1.35, 1),
+                    facecolor="white")
 
-        ax.set_axis_off()
-        # save to base64
-        tmpfile = BytesIO()
-        fig.savefig(tmpfile, format='png')
-        encoded = base64.b64encode(tmpfile.getvalue()).decode('utf-8')
-        #plt.show()
-        return f'<img src=\'data:image/png;base64,{encoded}\'>'
+            ax.set_axis_off()
+            # save to base64
+            tmpfile = BytesIO()
+            fig.savefig(tmpfile, format='png')
+            encoded = base64.b64encode(tmpfile.getvalue()).decode('utf-8')
+            #plt.show()
+            return f'<img src=\'data:image/png;base64,{encoded}\'>'
+        except Exception as e:
+            print(f"Show Prediction Map error: ", e)
+            return None
 
     # main workflow  
     def run(self, preprocess, model_name, model_param, save_report_path, target_path=None, save_target_path=None,

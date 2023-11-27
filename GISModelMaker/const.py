@@ -23,5 +23,7 @@ MODEL_SVC = 'SVM'
 MODEL_SVC_GS = 'SVM with GridSearch'
 MODEL_NN_MLP = 'NN (Multi layer Perceptron)'
 MODEL_NN_MLP_GS = 'NN (Multi layer Perceptron) with GridSearch'
+MODEL_SAM = 'Spectral Angle Mapper (SAM)'
+
 # report template
 report_tpl_path = 'report.tpl'

@@ -12,11 +12,11 @@ class Preprocesser:
             # normalization
             const.PREPRO_STANDSCALE: StandardScaler(),
             # decomposition
-            const.PREPRO_PCA: PCA(n_components=0.99),
-            const.PREPRO_RBF_KERNEL_PCA: KernelPCA(n_components=const.MAX_COMPONENT, kernel="rbf", gamma=0.04, fit_inverse_transform=True, alpha=0.01),
+            const.PREPRO_PCA: PCA(n_components=0.99, random_state=42),
+            const.PREPRO_RBF_KERNEL_PCA: KernelPCA(n_components=const.MAX_COMPONENT, kernel="rbf", gamma=0.04, fit_inverse_transform=True, alpha=0.01, random_state=42),
             # Factor Analysis
-            const.PREPRO_FA: FactorAnalysis(n_components=const.MAX_COMPONENT),
-            const.PREPRO_FICA: FastICA(n_components=const.MAX_COMPONENT),
+            const.PREPRO_FA: FactorAnalysis(n_components=const.MAX_COMPONENT, random_state=42),
+            const.PREPRO_FICA: FastICA(n_components=const.MAX_COMPONENT, random_state=42),
             #const.PREPRO_NMF: NMF(n_components=const.MAX_COMPONENT),
             # feature selection
             #const.PREPRO_VT: VarianceThreshold(threshold=500),
